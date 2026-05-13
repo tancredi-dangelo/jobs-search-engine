@@ -1,20 +1,56 @@
-import { Row, Col } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Row, Col, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
-const Job = ({ data }) => (
-  <Row
-    className="mx-0 mt-3 p-3"
-    style={{ border: '1px solid #00000033', borderRadius: 4 }}
-  >
-    <Col xs={3}>
-      <Link to={`/${data.company_name}`}>{data.company_name}</Link>
-    </Col>
-    <Col xs={9}>
-      <a href={data.url} target="_blank" rel="noreferrer">
-        {data.title}
-      </a>
-    </Col>
-  </Row>
-)
+const Job = ({ data }) => {
+  const isFavorite = useSelector((state) =>
+    state.favoriteJobs.some((job) => job._id === data._id),
+  );
+  const dispatch = useDispatch();
 
-export default Job
+  return (
+    <Row
+      className="mx-0 mt-3 p-4 glass"
+      style={{
+        border: "1px solid #00000033",
+        borderRadius: "12px",
+      }}
+    >
+      <Col xs={2} className="d-flex align-items-center justify-content-start">
+        <Link
+          className="nav-link text-primary fw-semibold"
+          to={`/${data.company_name}`}
+        >
+          {data.company_name}
+        </Link>
+      </Col>
+
+      <Col xs={7} className="d-flex align-items-center justify-content-start">
+        <a
+          className="nav-link text-primary d-flex align-items-center gap-2"
+          href={data.url}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {data.title}
+          <i className="bi bi-box-arrow-up-right"></i>
+        </a>
+      </Col>
+      <Col xs={3} className="d-flex align-items-center justify-content-end">
+        <Button
+          onClick={() => {
+            dispatch({
+              type: isFavorite ? "REMOVE_FAVORITE_JOB" : "ADD_FAVORITE_JOB",
+              payload: isFavorite ? data._id : data,
+            });
+          }}
+          className={isFavorite ? "btn btn-danger" : "btn btn-success"}
+        >
+          {isFavorite ? "Remove" : "Add to Favorites"}
+        </Button>
+      </Col>
+    </Row>
+  );
+};
+
+export default Job;

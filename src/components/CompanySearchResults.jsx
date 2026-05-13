@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Button } from "react-bootstrap";
 import Job from "./Job";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 
 const CompanySearchResults = () => {
   const [jobs, setJobs] = useState([]);
   const params = useParams();
+  const navigate = useNavigate();
 
-  const baseEndpoint = "https://strive-benchmark.herokuapp.com/api/jobs?company=";
+  const isFavorite = useSelector((state) =>
+    state.favoriteCompanies.includes(params.company),
+  );
+
+  const dispatch = useDispatch();
+
+  const baseEndpoint =
+    "https://strive-benchmark.herokuapp.com/api/jobs?company=";
 
   useEffect(() => {
     getJobs();
@@ -32,10 +41,46 @@ const CompanySearchResults = () => {
     <Container>
       <Row>
         <Col className="my-3">
-          <h1 className="display-4">Job posting for: {params.company}</h1>
-          {jobs.map(jobData => (
+          <div className="d-flex align-items-center my-5">
+            <h1 className="display-4 me-5">
+              Job posting for: <b>{params.company}</b>
+            </h1>
+            <Button
+              className={isFavorite ? "btn btn-danger" : "btn btn-success"}
+              style={{ height: "50%" }}
+              onClick={() => {
+                dispatch({
+                  type: isFavorite
+                    ? "REMOVE_FAVORITE_COMPANY"
+                    : "ADD_FAVORITE_COMPANY",
+                  payload: params.company,
+                });
+              }}
+            >
+              {isFavorite
+                ? "Remove Company from Favorites"
+                : "Add Company to Favorites"}
+            </Button>
+          </div>
+
+          {jobs.map((jobData) => (
             <Job key={jobData._id} data={jobData} />
           ))}
+        </Col>
+      </Row>
+      <Row className="d-flex align-items-center justify-content-center my-5">
+        <Col
+          xs={3}
+          className="d-flex align-items-center justify-content-center"
+        >
+          <Button
+            variant="outline-primary bg-white border-0 text-primary shadow"
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            Back to Homepage
+          </Button>
         </Col>
       </Row>
     </Container>
